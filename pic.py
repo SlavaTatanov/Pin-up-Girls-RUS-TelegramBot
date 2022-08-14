@@ -7,6 +7,8 @@ import config
 classic = ['классический']
 modern = ['современный']
 rand = ['девушка', 'женщина', 'пин-ап']
+no_repeat = ['a']  # Иногда база возвращает 'а' вместо ссылки, ее наличие в списке не дает произойти ошибке
+
 
 
 def give_pic(string):
@@ -59,11 +61,16 @@ def pic_from_data(st):
     """
     Выбирает картинку из классических или современных работ и возвращает кортеж с информацией и ссылкой
     """
-    with sq.connect('data.db') as con:
-        cur = con.cursor()
-        cur.execute(f"SELECT * FROM pic WHERE style == '{st}' ORDER BY RANDOM() LIMIT 1")
-        res = cur.fetchall()[0]
-        return res
+    res = 'flag'  # res[2] - 'a', гарантированно запускает цикл
+    while res[2] in no_repeat:
+        with sq.connect('data.db') as con:
+            cur = con.cursor()
+            cur.execute(f"SELECT * FROM pic WHERE style == '{st}' ORDER BY RANDOM() LIMIT 1")
+            res = cur.fetchall()[0]
+    no_repeat.append(res[2])
+    if len(no_repeat) > 15:
+        del no_repeat[1:8]
+    return res
 
 
 def no_pic():
