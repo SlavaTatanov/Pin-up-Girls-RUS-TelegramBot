@@ -1,9 +1,12 @@
 import telebot
 import config
+import dataupdate
 import keyboards
 from pic import give_pic
 
 bot = telebot.TeleBot(config.token)
+
+dataupdate.data_upd()  # При старте программы автоматически подхватывает актуальную БД гугл диска и создает/обновляет ее
 
 
 @bot.message_handler(commands=['start'])
@@ -14,7 +17,6 @@ def start(message):
 @bot.message_handler(content_types=['text'])
 def first(message):
     mess = str.lower(message.text)
-    user = message.from_user.id
     res = give_pic(mess)
     if mess == 'меню':
         bot.send_message(message.chat.id, 'Вызов меню', reply_markup=keyboards.menu_markup)
