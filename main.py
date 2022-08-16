@@ -20,7 +20,10 @@ def first(message):
     res = give_pic(mess)
     if mess == 'меню':
         bot.send_message(message.chat.id, 'Вызов меню', reply_markup=keyboards.menu_markup)
-        bot.register_next_step_handler(message, two)
+        bot.register_next_step_handler(message, menu)
+    elif mess == 'admin.run':
+        bot.send_message(message.chat.id, 'Запуск режима администратора', reply_markup=keyboards.admin_markup)
+        bot.register_next_step_handler(message, admin_mod)
     elif not res[2] == 'no_pic':
         bot.send_photo(message.chat.id, res[2], f'{res[0]}\nХуд. {res[1]}\nИсточник {res[3]}',
                        reply_markup=keyboards.basic_markup)
@@ -28,20 +31,32 @@ def first(message):
         bot.send_message(message.chat.id, res[0], reply_markup=keyboards.basic_markup)
 
 
-def two(message):
+def menu(message):
     mess = str.lower(message.text)
     if mess == 'назад':
         bot.send_message(message.chat.id, 'Возврат', reply_markup=keyboards.basic_markup)
         bot.register_next_step_handler(message, first)
     elif mess == 'современные авторы':
         bot.send_message(message.chat.id, 'Здесь будут современные авторы')
-        bot.register_next_step_handler(message, two)
+        bot.register_next_step_handler(message, menu)
     elif mess == 'классические авторы':
         bot.send_message(message.chat.id, 'Здесь будут классические авторы')
-        bot.register_next_step_handler(message, two)
+        bot.register_next_step_handler(message, menu)
     else:
         bot.send_message(message.chat.id, 'Для возврата нажмите "назад"', reply_markup=keyboards.menu_markup)
-        bot.register_next_step_handler(message, two)
+        bot.register_next_step_handler(message, menu)
+
+
+def admin_mod(message):
+    mess = message.text
+    if mess == 'Обновить БД':
+        bot.send_message(message.chat.id, 'Обновляю', reply_markup=keyboards.admin_markup)
+        dataupdate.data_upd()
+        bot.send_message(message.chat.id, 'Готово', reply_markup=keyboards.admin_markup)
+        bot.register_next_step_handler(message, admin_mod)
+    elif mess == 'Назад':
+        bot.send_message(message.chat.id, 'Возврат', reply_markup=keyboards.basic_markup)
+        bot.register_next_step_handler(message, first)
 
 
 bot.polling(non_stop=True)
