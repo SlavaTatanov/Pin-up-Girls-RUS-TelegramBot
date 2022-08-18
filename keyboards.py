@@ -1,5 +1,21 @@
 from telebot import types
 
+classic_keyboard_buttons = []
+modern_keyboard_buttons = []
+
+
+def keyboard_create(lst, classic):
+    if classic:
+        for x in lst:
+            classic_keyboard_buttons.append(types.KeyboardButton(str(x)))
+        classic_markup.add(*classic_keyboard_buttons, row_width=1)
+        classic_markup.add(button_2_04)
+    else:
+        for x in lst:
+            modern_keyboard_buttons.append(types.KeyboardButton(str(x)))
+        modern_markup.add(*modern_keyboard_buttons, row_width=1)
+        modern_markup.add(button_2_04)
+
 
 basic_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
 button_1_01 = types.KeyboardButton('Классический пин-ап')
@@ -24,3 +40,8 @@ admin_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard
 button_3_01 = types.KeyboardButton('Обновить БД')
 admin_markup.add(button_3_01)
 admin_markup.add(button_2_04)
+
+
+classic_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
+
+modern_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)

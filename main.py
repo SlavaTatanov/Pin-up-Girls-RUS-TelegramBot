@@ -37,11 +37,11 @@ def menu(message):
         bot.send_message(message.chat.id, 'Возврат', reply_markup=keyboards.basic_markup)
         bot.register_next_step_handler(message, first)
     elif mess == 'современные авторы':
-        bot.send_message(message.chat.id, 'Здесь будут современные авторы')
-        bot.register_next_step_handler(message, menu)
+        bot.send_message(message.chat.id, 'Список современных авторов', reply_markup=keyboards.modern_markup)
+        bot.register_next_step_handler(message, modern_menu)
     elif mess == 'классические авторы':
-        bot.send_message(message.chat.id, 'Здесь будут классические авторы')
-        bot.register_next_step_handler(message, menu)
+        bot.send_message(message.chat.id, 'Список классических авторов', reply_markup=keyboards.classic_markup)
+        bot.register_next_step_handler(message, classic_menu)
     else:
         bot.send_message(message.chat.id, 'Для возврата нажмите "назад"', reply_markup=keyboards.menu_markup)
         bot.register_next_step_handler(message, menu)
@@ -57,6 +57,20 @@ def admin_mod(message):
     elif mess == 'Назад':
         bot.send_message(message.chat.id, 'Возврат', reply_markup=keyboards.basic_markup)
         bot.register_next_step_handler(message, first)
+
+
+def classic_menu(message):
+    mess = message.text
+    if mess == 'Назад':
+        bot.send_message(message.chat.id, 'Возврат', reply_markup=keyboards.menu_markup)
+        bot.register_next_step_handler(message, menu)
+
+
+def modern_menu(message):
+    mess = message.text
+    if mess == 'Назад':
+        bot.send_message(message.chat.id, 'Возврат', reply_markup=keyboards.menu_markup)
+        bot.register_next_step_handler(message, menu)
 
 
 bot.polling(non_stop=True)
