@@ -7,6 +7,7 @@ from pic import give_pic
 bot = telebot.TeleBot(config.token)
 
 dataupdate.data_upd()  # При старте программы автоматически подхватывает актуальную БД гугл диска и создает/обновляет ее
+actual_keyboard = keyboards.menu_markup
 
 
 @bot.message_handler(commands=['start'])
@@ -33,15 +34,18 @@ def first(message):
 
 def menu(message):
     mess = str.lower(message.text)
+    global actual_keyboard
     if mess == 'назад':
         bot.send_message(message.chat.id, 'Возврат', reply_markup=keyboards.basic_markup)
         bot.register_next_step_handler(message, first)
     elif mess == 'современные авторы':
-        bot.send_message(message.chat.id, 'Список современных авторов', reply_markup=keyboards.modern_markup)
-        bot.register_next_step_handler(message, modern_menu)
+        actual_keyboard = keyboards.modern_markup
+        bot.send_message(message.chat.id, 'Список современных авторов', reply_markup=actual_keyboard)
+        bot.register_next_step_handler(message, author_menu)
     elif mess == 'классические авторы':
-        bot.send_message(message.chat.id, 'Список классических авторов', reply_markup=keyboards.classic_markup)
-        bot.register_next_step_handler(message, classic_menu)
+        actual_keyboard = keyboards.classic_markup
+        bot.send_message(message.chat.id, 'Список классических авторов', reply_markup=actual_keyboard)
+        bot.register_next_step_handler(message, author_menu)
     else:
         bot.send_message(message.chat.id, 'Для возврата нажмите "назад"', reply_markup=keyboards.menu_markup)
         bot.register_next_step_handler(message, menu)
@@ -59,18 +63,28 @@ def admin_mod(message):
         bot.register_next_step_handler(message, first)
 
 
-def classic_menu(message):
+def author_menu(message):
     mess = message.text
-    if mess == 'Назад':
+    if mess in dataupdate.modern_authors or mess in dataupdate.classic_authors:
+        keyboards.author_keyboard_create(mess)
+        bot.send_message(message.chat.id, 'О авторе', reply_markup=keyboards.author_markup)
+        bot.register_next_step_handler(message, one_author_menu)
+    elif mess == 'Назад':
         bot.send_message(message.chat.id, 'Возврат', reply_markup=keyboards.menu_markup)
         bot.register_next_step_handler(message, menu)
+    else:
+        bot.send_message(message.chat.id, 'Воспользуйтесь кнопками', reply_markup=actual_keyboard)
+        bot.register_next_step_handler(message, author_menu)
 
 
-def modern_menu(message):
+def one_author_menu(message):
     mess = message.text
     if mess == 'Назад':
-        bot.send_message(message.chat.id, 'Возврат', reply_markup=keyboards.menu_markup)
-        bot.register_next_step_handler(message, menu)
+        bot.send_message(message.chat.id, 'Возврат', reply_markup=actual_keyboard)
+        bot.register_next_step_handler(message, author_menu)
+    else:
+        bot.send_message(message.chat.id, 'Используйте кнопки', reply_markup=keyboards.author_markup)
+        bot.register_next_step_handler(message, one_author_menu)
 
 
 bot.polling(non_stop=True)
