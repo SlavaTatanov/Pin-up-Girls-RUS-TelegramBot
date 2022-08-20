@@ -2,6 +2,7 @@ import telebot
 import config
 import dataupdate
 import keyboards
+import pic
 from pic import give_pic
 
 bot = telebot.TeleBot(config.token)
@@ -82,6 +83,15 @@ def one_author_menu(message):
     if mess == 'Назад':
         bot.send_message(message.chat.id, 'Возврат', reply_markup=actual_keyboard)
         bot.register_next_step_handler(message, author_menu)
+    elif 'Био.' in mess:
+        res = pic.info_from_data(author=mess[5:])
+        bot.send_message(message.chat.id, res[0], reply_markup=keyboards.author_markup)
+        bot.register_next_step_handler(message, one_author_menu)
+    elif 'Работы' in mess:
+        res = pic.pic_from_data(f'{pic.aut} "{mess[7:]}"')
+        bot.send_photo(message.chat.id, res[2], f'{res[0]}\nХуд. {res[1]}\nИсточник {res[3]}',
+                       reply_markup=keyboards.author_markup)
+        bot.register_next_step_handler(message, one_author_menu)
     else:
         bot.send_message(message.chat.id, 'Используйте кнопки', reply_markup=keyboards.author_markup)
         bot.register_next_step_handler(message, one_author_menu)

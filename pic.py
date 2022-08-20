@@ -2,13 +2,15 @@ import sqlite3 as sq
 from fuzzywuzzy import fuzz
 from random import choice
 
-import config
 
 classic = ['классический']
 modern = ['современный']
 rand = ['девушка', 'женщина', 'пин-ап']
 no_repeat = ['a']  # Иногда база возвращает 'а' вместо ссылки, ее наличие в списке не дает произойти ошибке
-
+st = 'style == '
+cl = "'classic'"
+mod = "'modern'"
+aut = 'author =='
 
 
 def give_pic(string):
@@ -17,11 +19,11 @@ def give_pic(string):
     """
     ls = message_conversion(str(string))
     if text_check(ls, classic):
-        return pic_from_data(config.classic)
+        return pic_from_data(st + cl)
     elif text_check(ls, modern):
-        return pic_from_data(config.modern)
+        return pic_from_data(st + mod)
     elif text_check(ls, rand):
-        res = pic_from_data(choice([config.classic, config.modern]))
+        res = pic_from_data(st + (choice([cl, mod])))
         return res
     else:
         return no_pic()
@@ -57,15 +59,16 @@ def text_check(lst, ref, acc=65):
     return ind
 
 
-def pic_from_data(st):
+def pic_from_data(que):
     """
-    Выбирает картинку из классических или современных работ и возвращает кортеж с информацией и ссылкой
+    Выбирает картинку из классических или современных работ
+    либо одного из авторов, если пользователь запросит конкретного и возвращает кортеж с информацией и ссылкой
     """
     res = 'flag'  # res[2] - 'a', гарантированно запускает цикл
     while res[2] in no_repeat:
         with sq.connect('data.db') as con:
             cur = con.cursor()
-            cur.execute(f"SELECT * FROM pic WHERE style == '{st}' ORDER BY RANDOM() LIMIT 1")
+            cur.execute(f"SELECT * FROM pic WHERE {que} ORDER BY RANDOM() LIMIT 1")
             res = cur.fetchall()[0]
     no_repeat.append(res[2])
     if len(no_repeat) > 15:
@@ -79,3 +82,18 @@ def no_pic():
     """
     res = ('Чтобы я прислал пин-ап воспользуйтесь кнопками', '', 'no_pic', '')
     return res
+
+
+def info_from_data(author=None, style=False):
+    """
+    Возвращает текстовую информацию в зависимости от вызова
+    param author: Передается имя автора
+    param style: Если False то вернет биографию автора, если True информацию о стиле
+    return: Текстовая информация
+    """
+    if not style:
+        with sq.connect('data.db') as con:
+            cur = con.cursor()
+            cur.execute(f"SELECT bio FROM authors WHERE author == '{author}'")
+            res = cur.fetchall()[0]
+            return res
