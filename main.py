@@ -8,7 +8,9 @@ from pic import give_pic
 bot = telebot.TeleBot(config.token)
 
 dataupdate.data_upd()  # При старте программы автоматически подхватывает актуальную БД гугл диска и создает/обновляет ее
-actual_keyboard = keyboards.menu_markup
+actual_keyboard = keyboards.menu_markup  # Переносит клавиатуру пользователя из функции в функцию и сохраняет в словарь
+keyboard_this_user = {}  # В этот словарь сохраняется клавиатура пользователя, позволяет двум пользователям иметь свои
+# клавиатуры
 
 
 @bot.message_handler(commands=['start'])
@@ -79,21 +81,25 @@ def author_menu(message):
 
 
 def one_author_menu(message):
+    user = message.from_user.id
+    if user not in keyboard_this_user:
+        keyboard_this_user[user] = keyboards.author_markup
     mess = message.text
     if mess == 'Назад':
+        del keyboard_this_user[user]
         bot.send_message(message.chat.id, 'Возврат', reply_markup=actual_keyboard)
         bot.register_next_step_handler(message, author_menu)
     elif 'Био.' in mess:
         res = pic.info_from_data(author=mess[5:])
-        bot.send_message(message.chat.id, res[0], reply_markup=keyboards.author_markup)
+        bot.send_message(message.chat.id, res[0], reply_markup=keyboard_this_user[user])
         bot.register_next_step_handler(message, one_author_menu)
     elif 'Работы' in mess:
         res = pic.pic_from_data(f'{pic.aut} "{mess[7:]}"')
         bot.send_photo(message.chat.id, res[2], f'{res[0]}\nХуд. {res[1]}\nИсточник {res[3]}',
-                       reply_markup=keyboards.author_markup)
+                       reply_markup=keyboard_this_user[user])
         bot.register_next_step_handler(message, one_author_menu)
     else:
-        bot.send_message(message.chat.id, 'Используйте кнопки', reply_markup=keyboards.author_markup)
+        bot.send_message(message.chat.id, 'Используйте кнопки', reply_markup=keyboard_this_user[user])
         bot.register_next_step_handler(message, one_author_menu)
 
 
