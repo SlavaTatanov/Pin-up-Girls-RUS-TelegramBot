@@ -17,6 +17,7 @@ def data_upd():
     database_upd.write(upd.content)
     database_upd.close()
     authors_upd()
+    keyboards.keyboards_create()
 
 
 def authors_upd():
