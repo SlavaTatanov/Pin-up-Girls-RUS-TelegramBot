@@ -8,7 +8,7 @@ from pic import give_pic
 bot = telebot.TeleBot(config.token)
 
 dataupdate.data_upd()  # При старте программы автоматически подхватывает актуальную БД гугл диска и создает/обновляет ее
-actual_keyboard = keyboards.keyboards['menu_markup']  # Переносит клавиатуру пользователя из функции в функцию и
+actual_keyboard = {}  # Переносит клавиатуру пользователя из функции в функцию и
 # сохраняет в словарь
 keyboard_this_user = {}  # В этот словарь сохраняется клавиатура пользователя, позволяет двум пользователям иметь свои
 # клавиатуры
@@ -40,17 +40,17 @@ def first(message):
 
 def menu(message):
     mess = str.lower(message.text)
-    global actual_keyboard
+    user = message.from_user.id
     if mess == 'назад':
         bot.send_message(message.chat.id, 'Возврат', reply_markup=keyboards.keyboards['basic_markup'])
         bot.register_next_step_handler(message, first)
     elif mess == 'современные авторы':
-        actual_keyboard = keyboards.keyboards['modern_markup']
-        bot.send_message(message.chat.id, 'Список современных авторов', reply_markup=actual_keyboard)
+        actual_keyboard[user] = keyboards.keyboards['modern_markup']
+        bot.send_message(message.chat.id, 'Список современных авторов', reply_markup=actual_keyboard[user])
         bot.register_next_step_handler(message, author_menu)
     elif mess == 'классические авторы':
-        actual_keyboard = keyboards.keyboards['classic_markup']
-        bot.send_message(message.chat.id, 'Список классических авторов', reply_markup=actual_keyboard)
+        actual_keyboard[user] = keyboards.keyboards['classic_markup']
+        bot.send_message(message.chat.id, 'Список классических авторов', reply_markup=actual_keyboard[user])
         bot.register_next_step_handler(message, author_menu)
     else:
         bot.send_message(message.chat.id, 'Для возврата нажмите "назад"',
@@ -72,26 +72,27 @@ def admin_mod(message):
 
 def author_menu(message):
     mess = message.text
+    user = message.from_user.id
     if mess in dataupdate.modern_authors or mess in dataupdate.classic_authors:
         keyboards.author_keyboard_create(mess)
-        bot.send_message(message.chat.id, 'О авторе', reply_markup=keyboards.author_markup)
+        keyboard_this_user[user] = keyboards.keyboards['author_markup']
+        bot.send_message(message.chat.id, 'О авторе', reply_markup=keyboard_this_user[user])
         bot.register_next_step_handler(message, one_author_menu)
     elif mess == 'Назад':
+        del actual_keyboard[user]
         bot.send_message(message.chat.id, 'Возврат', reply_markup=keyboards.keyboards['menu_markup'])
         bot.register_next_step_handler(message, menu)
     else:
-        bot.send_message(message.chat.id, 'Воспользуйтесь кнопками', reply_markup=actual_keyboard)
+        bot.send_message(message.chat.id, 'Воспользуйтесь кнопками', reply_markup=actual_keyboard[user])
         bot.register_next_step_handler(message, author_menu)
 
 
 def one_author_menu(message):
     user = message.from_user.id
-    if user not in keyboard_this_user:
-        keyboard_this_user[user] = keyboards.author_markup
     mess = message.text
     if mess == 'Назад':
         del keyboard_this_user[user]
-        bot.send_message(message.chat.id, 'Возврат', reply_markup=actual_keyboard)
+        bot.send_message(message.chat.id, 'Возврат', reply_markup=actual_keyboard[user])
         bot.register_next_step_handler(message, author_menu)
     elif 'Био.' in mess:
         res = pic.info_from_data(author=mess[5:])

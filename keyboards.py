@@ -36,9 +36,6 @@ def admin_markup_create():
     keyboards['admin_markup'] = admin_markup
 
 
-author_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
-
-
 def keyboard_create(lst, classic):
     classic_keyboard_buttons = []
     modern_keyboard_buttons = []
@@ -59,7 +56,6 @@ def keyboard_create(lst, classic):
 
 
 def author_keyboard_create(mess):
-    global author_markup
-    author_markup = types.ReplyKeyboardRemove
     author_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
     author_markup.add(f'Био. {mess}', f'Работы {mess}', back_button, row_width=1)
+    keyboards['author_markup'] = author_markup
