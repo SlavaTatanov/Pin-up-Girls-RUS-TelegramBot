@@ -6,6 +6,7 @@ import keyboards
 
 modern_authors = tuple()
 classic_authors = tuple()
+stack_size = {}
 
 
 def data_upd():
@@ -18,6 +19,7 @@ def data_upd():
     database_upd.close()
     authors_upd()
     keyboards.keyboards_create()
+    stack_size_upd()
 
 
 def authors_upd():
@@ -39,3 +41,15 @@ def authors_upd():
         classic_authors = cur.fetchall()
         classic_authors = [x[0] for x in classic_authors]
         keyboards.keyboard_create(classic_authors, classic=True)
+
+
+def stack_size_upd():
+    """
+    Данная функция вычисляет минимальный размер стека в котором хранятся изображения отправленные пользователю,
+    нужно для того чтобы присылаемые ботом картины не повторялись насколько это возможно долго
+    """
+    with sq.connect('data.db') as con:
+        cur = con.cursor()
+        cur.execute("SELECT count(author) FROM pic GROUP BY author ORDER BY count(author) LIMIT 1 ")
+        stack_min = cur.fetchall()
+        stack_size['min'] = stack_min[0][0] - 1

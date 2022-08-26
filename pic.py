@@ -2,6 +2,7 @@ import sqlite3 as sq
 from fuzzywuzzy import fuzz
 from random import choice
 
+import dataupdate
 
 classic = ['классический']
 modern = ['современный']
@@ -71,8 +72,9 @@ def pic_from_data(que):
             cur.execute(f"SELECT * FROM pic WHERE {que} ORDER BY RANDOM() LIMIT 1")
             res = cur.fetchall()[0]
     no_repeat.append(res[2])
-    if len(no_repeat) > 15:
-        del no_repeat[1:8]
+    print(len(no_repeat))
+    if len(no_repeat) > dataupdate.stack_size['min']:
+        del no_repeat[1:(dataupdate.stack_size['min']//2)]
     return res
 
 
