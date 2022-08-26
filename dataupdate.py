@@ -13,10 +13,9 @@ def data_upd():
     """
     При старте программы или запуске из режима админа обновляет базу данных
     """
-    database_upd = open('data.db', 'wb')
-    upd = requests.get('https://drive.google.com/uc?export=download&id=1EIU2yTyCKs9S2xNRoXCqDr2foEVskICE')
-    database_upd.write(upd.content)
-    database_upd.close()
+    with open('data.db', 'wb') as database_upd:
+        upd = requests.get('https://drive.google.com/uc?export=download&id=1EIU2yTyCKs9S2xNRoXCqDr2foEVskICE')
+        database_upd.write(upd.content)
     authors_upd()
     keyboards.keyboards_create()
     stack_size_upd()

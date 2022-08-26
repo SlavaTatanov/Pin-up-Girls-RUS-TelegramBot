@@ -72,7 +72,6 @@ def pic_from_data(que):
             cur.execute(f"SELECT * FROM pic WHERE {que} ORDER BY RANDOM() LIMIT 1")
             res = cur.fetchall()[0]
     no_repeat.append(res[2])
-    print(len(no_repeat))
     if len(no_repeat) > dataupdate.stack_size['min']:
         del no_repeat[1:(dataupdate.stack_size['min']//2)]
     return res
