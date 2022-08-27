@@ -98,3 +98,9 @@ def info_from_data(author=None, style=False):
             cur.execute(f"SELECT bio FROM authors WHERE author == '{author}'")
             res = cur.fetchall()[0]
             return res
+    elif style:
+        with sq.connect('data.db') as con:
+            cur = con.cursor()
+            cur.execute(f"SELECT value FROM date")
+            res = cur.fetchall()[0]
+            return res
