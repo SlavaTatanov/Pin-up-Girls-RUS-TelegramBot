@@ -55,6 +55,7 @@ def menu(message):
     elif mess == 'о стиле':
         res = pic.info_from_data(style=True)
         bot.send_message(message.chat.id, res[0], reply_markup=keyboards.keyboards['menu_markup'])
+        bot.register_next_step_handler(message, menu)
     else:
         bot.send_message(message.chat.id, 'Для возврата нажмите "назад"',
                          reply_markup=keyboards.keyboards['menu_markup'])
