@@ -32,7 +32,8 @@ def menu_markup_create():
 def admin_markup_create():
     admin_markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
     button_3_01 = types.KeyboardButton('Обновить БД')
-    admin_markup.add(button_3_01, back_button, row_width=1)
+    button_3_02 = types.KeyboardButton('Счетчик пользователей')
+    admin_markup.add(button_3_01, button_3_02, back_button, row_width=1)
     keyboards['admin_markup'] = admin_markup
 
 

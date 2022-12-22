@@ -4,6 +4,8 @@ import dataupdate
 import keyboards
 import pic
 from pic import give_pic
+from tools.admin import admin
+from tools.counter import Counter
 
 bot = telebot.TeleBot(config.token)
 
@@ -12,6 +14,7 @@ actual_keyboard = {}  # Переносит клавиатуру пользова
 # сохраняет в словарь
 keyboard_this_user = {}  # В этот словарь сохраняется клавиатура пользователя, позволяет двум пользователям иметь свои
 # клавиатуры
+counter = Counter()
 
 
 @bot.message_handler(commands=['start'])
@@ -28,10 +31,16 @@ def first(message):
         bot.send_message(message.chat.id, 'Вызов меню', reply_markup=keyboards.keyboards['menu_markup'])
         bot.register_next_step_handler(message, menu)
     elif mess == 'admin.run':
-        bot.send_message(message.chat.id, 'Запуск режима администратора',
-                         reply_markup=keyboards.keyboards['admin_markup'])
-        bot.register_next_step_handler(message, admin_mod)
+        if admin(message.chat.id):
+            bot.send_message(message.chat.id, 'Запуск режима администратора',
+                             reply_markup=keyboards.keyboards['admin_markup'])
+            bot.register_next_step_handler(message, admin_mod)
+        else:
+            bot.send_message(message.chat.id, 'Доступ запрещен',
+                             reply_markup=keyboards.keyboards['basic_markup'])
     elif not res[2] == 'no_pic':
+        if not admin(message.chat.id):
+            counter.add_id(message.chat.id)
         bot.send_photo(message.chat.id, res[2], f'{res[0]}\nХуд. {res[1]}\nИсточник {res[3]}',
                        reply_markup=keyboards.keyboards['basic_markup'])
     elif res[2] == 'no_pic':
@@ -69,6 +78,9 @@ def admin_mod(message):
         dataupdate.data_upd()
         bot.send_message(message.chat.id, 'Готово', reply_markup=keyboards.keyboards['admin_markup'])
         bot.register_next_step_handler(message, admin_mod)
+    elif mess == 'Счетчик пользователей':
+        bot.send_message(message.chat.id, counter.user_count(), reply_markup=keyboards.keyboards['admin_markup'])
+        bot.register_next_step_handler(message, admin_mod)
     elif mess == 'Назад':
         bot.send_message(message.chat.id, 'Возврат', reply_markup=keyboards.keyboards['basic_markup'])
         bot.register_next_step_handler(message, first)
@@ -103,6 +115,8 @@ def one_author_menu(message):
         bot.send_message(message.chat.id, res[0], reply_markup=keyboard_this_user[user])
         bot.register_next_step_handler(message, one_author_menu)
     elif 'Работы' in mess:
+        if not admin(message.chat.id):
+            counter.add_id(message.chat.id)
         res = pic.pic_from_data(f'{pic.aut} "{mess[7:]}"')
         bot.send_photo(message.chat.id, res[2], f'{res[0]}\nХуд. {res[1]}\nИсточник {res[3]}',
                        reply_markup=keyboard_this_user[user])
